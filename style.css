@@ -1,48 +1,43 @@
 body {
-  margin: 0;
-  overflow: hidden;
-  font-family: sans-serif;
+  margin:0;
+  overflow:hidden;
+  font-family:sans-serif;
 }
 
 #panel {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 320px;
-  height: 100%;
-  background: #111;
-  color: white;
-  padding: 10px;
-  box-sizing: border-box;
-  transition: transform 0.25s ease;
-  z-index: 10;
+  position:absolute;
+  left:0;
+  top:0;
+  width:280px;
+  height:100%;
+  background:#111;
+  color:white;
+  padding:10px;
+  box-sizing:border-box;
+  transition:transform .25s ease;
+  z-index:10;
 }
 
 #panel.hidden {
-  transform: translateX(-100%);
+  transform:translateX(-100%);
 }
 
 #toggle {
-  position: absolute;
-  left: 320px;
-  top: 10px;
-  z-index: 9999;
-  cursor: pointer;
-  background: #222;
-  color: white;
-  padding: 6px 10px;
+  position:absolute;
+  left:280px;
+  top:10px;
+  z-index:9999;
+  cursor:pointer;
+  background:#222;
+  color:white;
+  padding:5px 10px;
 }
 
-label {
-  display:block;
-  margin-top:10px;
-}
-
-input, select, button {
+input,select,button{
   width:100%;
-  margin-top:5px;
+  margin-top:8px;
 }
 
-canvas {
+canvas{
   display:block;
 }
