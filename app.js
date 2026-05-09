@@ -1,14 +1,9 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js"
 
-//
-// 🌌 scene
-//
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0x000000)
-
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000)
-camera.position.set(0,5,20)
+camera.position.set(0,5,18)
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(innerWidth, innerHeight)
@@ -17,80 +12,31 @@ document.body.appendChild(renderer.domElement)
 const controls = new OrbitControls(camera, renderer.domElement)
 
 //
-// 💥 particles
+// particle
 //
-const MAX = 8000
-
+const MAX = 3000
 const geo = new THREE.BufferGeometry()
 const pos = new Float32Array(MAX*3)
 const vel = new Float32Array(MAX*3)
-const alive = new Array(MAX).fill(false)
+const alive = Array(MAX).fill(false)
 
 geo.setAttribute("position", new THREE.BufferAttribute(pos,3))
 
-const mat = new THREE.PointsMaterial({
-  size:0.08,
-  color:0xffffff
-})
-
+const mat = new THREE.PointsMaterial({ size:0.08, color:0xffffff })
 const points = new THREE.Points(geo, mat)
 scene.add(points)
 
 //
-// 🧠 FULL FIREWORK TYPES（你要的完整）
+// shape
 //
 const Shape = {
-
-  sphere() {
-    return randVec()
-  },
-
-  ring() {
+  sphere: () => randVec(),
+  ring: () => {
     const a = Math.random()*Math.PI*2
     return new THREE.Vector3(Math.cos(a),0,Math.sin(a))
   },
-
-  palm() {
-    const a = Math.random()*Math.PI*2
-    return new THREE.Vector3(Math.cos(a),Math.random(),Math.sin(a)).normalize()
-  },
-
-  chrysanthemum() {
-    return randVec().multiplyScalar(rand(0.8,1.5))
-  },
-
-  willow() {
-    return new THREE.Vector3(
-      rand(-0.5,0.5),
-      rand(0.5,1.5),
-      rand(-0.5,0.5)
-    ).normalize()
-  },
-
-  crackle() {
-    return randVec().multiplyScalar(rand(1,2.5))
-  },
-
-  strobe() {
-    return randVec().multiplyScalar(rand(0.5,3))
-  },
-
-  heart() {
-    const t = Math.random()*Math.PI*2
-    return new THREE.Vector3(
-      16*Math.pow(Math.sin(t),3),
-      0.5,
-      13*Math.cos(t)-5*Math.cos(2*t)
-    ).normalize()
-  },
-
-  peony() {
-    return randVec().multiplyScalar(rand(0.5,2))
-  },
-
-  random() {
-    return randVec()
-  }
+  palm: () => randVec(),
+  random: () => randVec()
 }
 
 function randVec(){
@@ -101,29 +47,39 @@ function randVec(){
   ).normalize()
 }
 
-function rand(a,b){
-  return a + Math.random()*(b-a)
-}
-
 //
-// 🎛 state
+// state
 //
 const gui = {
   shape:"sphere",
-  count:400,
-  speed:7,
+  count:200,
+  speed:5,
   gravity:-3
 }
 
-document.getElementById("shape").onchange = e => gui.shape = e.target.value
-document.getElementById("count").oninput = e => gui.count = +e.target.value
-document.getElementById("speed").oninput = e => gui.speed = +e.target.value
-document.getElementById("gravity").oninput = e => gui.gravity = +e.target.value
+//
+// UI
+//
+document.getElementById("shape").addEventListener("change",e=>{
+  gui.shape=e.target.value
+})
+
+document.getElementById("count").addEventListener("input",e=>{
+  gui.count=+e.target.value
+})
+
+document.getElementById("speed").addEventListener("input",e=>{
+  gui.speed=+e.target.value
+})
+
+document.getElementById("gravity").addEventListener("input",e=>{
+  gui.gravity=+e.target.value
+})
 
 //
-// 💥 FIRE (穩定版)
+// fire
 //
-function fire() {
+function fire(){
 
   const fn = Shape[gui.shape]
 
@@ -148,23 +104,23 @@ function fire() {
   geo.attributes.position.needsUpdate=true
 }
 
-document.getElementById("fire").addEventListener("click", fire)
+document.getElementById("fireBtn")
+.addEventListener("click",fire)
 
 //
-// ☰ toggle（穩定）
+// toggle
 //
 const panel = document.getElementById("panel")
-document.getElementById("toggle").addEventListener("click",()=>{
+document.getElementById("toggle")
+.addEventListener("click",()=>{
   panel.classList.toggle("hidden")
 })
 
 //
-// 🌪 update
+// update
 //
 function update(){
-
   for(let i=0;i<MAX;i++){
-
     if(!alive[i]) continue
 
     vel[i*3+1]+=gui.gravity*0.01
