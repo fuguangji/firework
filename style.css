@@ -1,0 +1,61 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+/* 左側面板 */
+#panel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 100%;
+  background: #111;
+  color: white;
+  padding: 10px;
+  box-sizing: border-box;
+
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+  z-index: 1000;
+}
+
+#panel.collapsed {
+  transform: translateX(-320px);
+}
+
+/* toggle */
+#toggle {
+  position: absolute;
+  left: 320px;
+  top: 10px;
+  z-index: 9999;
+  cursor: pointer;
+  background: #222;
+  color: white;
+  padding: 5px 10px;
+}
+
+/* UI */
+label {
+  display: block;
+  margin-top: 10px;
+}
+
+input, select {
+  width: 100%;
+  margin-top: 5px;
+}
+
+button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 8px;
+  cursor: pointer;
+}
+
+/* canvas */
+canvas {
+  display: block;
+}
