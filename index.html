@@ -2,39 +2,27 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Firework Full System</title>
+<title>Stable Firework</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div id="panel">
-  <h3>🎆 Firework System</h3>
+  <h3>Firework</h3>
 
-  <label>Type</label>
   <select id="shape">
     <option>sphere</option>
     <option>ring</option>
     <option>palm</option>
-    <option>chrysanthemum</option>
-    <option>willow</option>
-    <option>crackle</option>
-    <option>strobe</option>
-    <option>heart</option>
-    <option>peony</option>
     <option>random</option>
   </select>
 
-  <label>Particles</label>
-  <input id="count" type="range" min="50" max="1200" value="400">
-
-  <label>Speed</label>
-  <input id="speed" type="range" min="1" max="20" value="7">
-
-  <label>Gravity</label>
+  <input id="count" type="range" min="50" max="500" value="200">
+  <input id="speed" type="range" min="1" max="10" value="5">
   <input id="gravity" type="range" min="-10" max="0" value="-3">
 
-  <button id="fire">💥 FIRE</button>
+  <button id="fireBtn">FIRE</button>
 </div>
 
 <div id="toggle">☰</div>
