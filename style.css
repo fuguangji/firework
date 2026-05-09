@@ -4,7 +4,6 @@ body {
   font-family: sans-serif;
 }
 
-/* 左側面板 */
 #panel {
   position: absolute;
   left: 0;
@@ -15,17 +14,14 @@ body {
   color: white;
   padding: 10px;
   box-sizing: border-box;
-
-  transform: translateX(0);
   transition: transform 0.25s ease;
-  z-index: 1000;
+  z-index: 10;
 }
 
-#panel.collapsed {
-  transform: translateX(-320px);
+#panel.hidden {
+  transform: translateX(-100%);
 }
 
-/* toggle */
 #toggle {
   position: absolute;
   left: 320px;
@@ -34,28 +30,19 @@ body {
   cursor: pointer;
   background: #222;
   color: white;
-  padding: 5px 10px;
+  padding: 6px 10px;
 }
 
-/* UI */
 label {
-  display: block;
-  margin-top: 10px;
+  display:block;
+  margin-top:10px;
 }
 
-input, select {
-  width: 100%;
-  margin-top: 5px;
+input, select, button {
+  width:100%;
+  margin-top:5px;
 }
 
-button {
-  margin-top: 15px;
-  width: 100%;
-  padding: 8px;
-  cursor: pointer;
-}
-
-/* canvas */
 canvas {
-  display: block;
+  display:block;
 }
