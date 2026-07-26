@@ -1,33 +1,382 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
 <head>
-<meta charset="utf-8">
-<title>Stable Firework</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2027 冬季 UHC 錦標賽 | 立即報名</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- 引入 Supabase 官方 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['"Noto Sans TC"', 'sans-serif'], display: ['"Syncopate"', 'sans-serif'] }, colors: { polar: { 50: '#f0f7ff', 100: '#e0effe', 200: '#bae0fd', 300: '#7cc8fc', 400: '#38bdf8', 500: '#0ea5e9', 800: '#0369a1', 900: '#0c4a6e', 950: '#082f49' } } } } }
+    </script>
+    <style>
+        :root { --light-glass: rgba(255, 255, 255, 0.75); --light-border: rgba(255, 255, 255, 0.5); --light-shadow: 0 12px 40px -10px rgba(14, 165, 233, 0.15); --blur-effect: blur(16px); }
+        body { background-color: #f0f7ff; color: #0c4a6e; font-family: 'Noto Sans TC', sans-serif; }
+        .bg-overlay { position: fixed; inset: 0; z-index: -2; background: linear-gradient(to bottom, rgba(240, 247, 255, 0.5) 0%, rgba(224, 239, 254, 0.9) 100%); backdrop-filter: blur(8px); }
+        .glass-card { background: var(--light-glass); backdrop-filter: var(--blur-effect); border: 1px solid var(--light-border); box-shadow: var(--light-shadow); border-radius: 24px; }
+        .text-gradient-polar { background: linear-gradient(135deg, #082f49 0%, #0284c7 60%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* 彈窗動畫 */
+        .modal-enter { opacity: 1 !important; pointer-events: auto !important; }
+        .modal-enter .modal-box { transform: scale(1) !important; }
+    </style>
 </head>
+<body class="antialiased">
+    <div class="bg-overlay"></div>
 
-<body>
+    <!-- 導覽列 -->
+    <header id="main-header" class="fixed w-full z-50 top-0 transition-all duration-500 py-3 px-6">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center glass-card shadow-sm border-white/50">
+            <a href="index.html" class="flex items-center gap-3 text-polar-950 font-bold tracking-widest text-lg">
+                <i data-lucide="snowflake" class="text-polar-500"></i><span class="font-display tracking-wider text-gradient-polar">WINTER UHC</span>
+            </a>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium tracking-wider text-polar-900">
+                <a href="index.html" class="hover:text-polar-500 transition-colors">首頁</a>
+                <a href="encyclopedia.html" class="hover:text-polar-500 transition-colors">系統百科</a>
+                <a href="database.html" class="hover:text-polar-500 transition-colors">礦物裝備</a>
+                <a href="rules.html" class="hover:text-polar-500 transition-colors">賽事規則</a>
+                <a href="progress.html" class="hover:text-polar-500 transition-colors">開發進度</a>
+                <a href="register.html" class="px-5 py-2.5 bg-polar-900 text-white rounded-xl shadow-lg hover:bg-polar-800 transition-all font-bold">立即報名</a>
+            </nav>
+        </div>
+    </header>
 
-<div id="panel">
-  <h3>Firework</h3>
+    <!-- 報名表單區塊 -->
+    <main class="pt-32 pb-24 px-6 max-w-3xl mx-auto min-h-screen">
+        <div class="glass-card p-8 md:p-12 relative overflow-hidden">
+            <div class="text-center mb-10">
+                <span class="text-polar-600 font-mono text-sm uppercase tracking-widest">Registration</span>
+                <h1 class="text-3xl font-bold text-polar-950 mt-2 mb-2 tracking-wider">參賽選手報名</h1>
+            </div>
 
-  <select id="shape">
-    <option>sphere</option>
-    <option>ring</option>
-    <option>palm</option>
-    <option>random</option>
-  </select>
+            <!-- 表單 -->
+            <form id="registration-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <!-- 加入隊伍註冊引導連結 -->
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="block text-polar-900 text-sm font-bold uppercase tracking-widest">隊伍名稱 <span class="text-xs font-normal text-polar-500">(單人請留空)</span></label>
+                            <a href="#" class="text-xs font-bold text-polar-500 hover:text-polar-800 underline underline-offset-2 flex items-center gap-1 transition-colors">
+                                還沒創建隊伍嗎？點此註冊！ <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+                        </div>
+                        <input type="text" id="team_name" class="w-full p-4 rounded-xl bg-white/70 border border-polar-200 text-polar-950 focus:outline-none focus:border-polar-500 transition-colors text-base shadow-sm" placeholder="記得先創建隊伍，獨行俠請留空（不用害羞，我也是獨行辦比賽）">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="block text-polar-900 text-sm font-bold uppercase tracking-widest">Email 信箱</label>
+                        </div>
+                        <input type="email" id="email" required class="w-full p-4 rounded-xl bg-white/70 border border-polar-200 text-polar-950 focus:outline-none focus:border-polar-500 transition-colors text-base shadow-sm" placeholder="example@mail.com">
+                    </div>
+                </div>
+                
+                <div>
+                    <!-- 加入獲取遊戲 ID 引導連結 -->
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="block text-polar-900 text-sm font-bold uppercase tracking-widest">Bloxd ID</label>
+                        <a href="https://bloxd.io" target="_blank" class="text-xs font-bold text-polar-500 hover:text-polar-800 underline underline-offset-2 flex items-center gap-1 transition-colors">
+                            不知道自己的名字嗎？點此獲得遊戲ID！ <i data-lucide="help-circle" class="w-3 h-3"></i>
+                        </a>
+                    </div>
+                    <input type="text" id="bloxd_id" required class="w-full p-4 rounded-xl bg-white/70 border border-polar-200 text-polar-950 focus:outline-none focus:border-polar-500 transition-colors text-base shadow-sm" placeholder="你的遊戲暱稱 ">
+                </div>
+                
+                <div>
+                    <label class="block text-polar-900 text-sm font-bold uppercase tracking-widest mb-2">死亡簡介 / 參賽宣言</label>
+                    <textarea id="description" rows="3" required class="w-full p-4 rounded-xl bg-white/70 border border-polar-200 text-polar-950 focus:outline-none focus:border-polar-500 transition-colors text-base shadow-sm" placeholder="請簡述你的遺言...當然，如果你贏了這個就會在官網上"></textarea>
+                </div>
+                
+                <button type="button" id="btn-pre-submit" onclick="handlePreSubmit()" class="w-full py-4 bg-polar-900 text-white font-bold rounded-xl shadow-lg hover:bg-polar-800 hover:-translate-y-1 transition-all tracking-widest text-base">
+                    提交報名申請
+                </button>
+                <!-- 錯誤與成功訊息顯示區 -->
+                <p id="form-feedback" class="text-center text-sm mt-4 hidden font-medium"></p>
+            </form>
+        </div>
+    </main>
 
-  <input id="count" type="range" min="50" max="500" value="200">
-  <input id="speed" type="range" min="1" max="10" value="5">
-  <input id="gravity" type="range" min="-10" max="0" value="-3">
+    <footer class="border-t border-polar-200 bg-white/40 py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6"><div class="flex items-center gap-3 font-bold tracking-widest"><i data-lucide="snowflake" class="text-polar-500"></i><span class="font-display">WINTER UHC 2027</span></div><p class="text-sm text-polar-600">&copy; 2027 Winter UHC Championship. 非官方社群賽事。</p></div>
+    </footer>
 
-  <button id="fireBtn">FIRE</button>
-</div>
+    <!-- 確認視窗 (Modal) -->
+    <div id="confirm-modal" class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <!-- 模糊遮罩 -->
+        <div class="absolute inset-0 bg-polar-950/40 backdrop-blur-sm" onclick="closeModal()"></div>
+        <!-- Modal 內容 -->
+        <div class="modal-box glass-card p-8 w-full max-w-md mx-6 relative z-10 transform scale-95 transition-transform duration-300">
+            <h2 class="text-2xl font-bold text-polar-950 mb-4 border-b border-polar-200 pb-3 flex items-center gap-2">
+                <i data-lucide="check-circle" class="text-polar-500 w-6 h-6"></i> 請確認資料
+            </h2>
+            <div id="modal-details" class="space-y-3 text-polar-900 text-sm mb-8 leading-relaxed font-medium">
+                <!-- 動態生成的確認內容會放在這 -->
+            </div>
+            <div class="flex gap-4">
+                <button onclick="closeModal()" class="flex-1 py-3 bg-white/60 border border-polar-200 text-polar-800 rounded-xl hover:bg-white transition-all font-bold tracking-widest">返回修改</button>
+                <button onclick="submitToSupabase()" id="btn-final-submit" class="flex-1 py-3 bg-polar-900 text-white rounded-xl shadow-lg hover:bg-polar-800 transition-all font-bold tracking-widest flex items-center justify-center gap-2">
+                    確認送出
+                </button>
+            </div>
+        </div>
+    </div>
 
-<div id="toggle">☰</div>
+    <!-- JavaScript 邏輯區 -->
+    <script>
+        lucide.createIcons();
 
-<script type="module" src="app.js"></script>
+        // ==========================================
+        // 1. Supabase 初始化設定
+        // ==========================================
+        const SUPABASE_URL = 'https://your-project-id.supabase.co'; // [請替換] 你的 Supabase URL
+        const SUPABASE_ANON_KEY = 'your-anon-key'; // [請替換] 你的 Supabase Anon Key
+        
+        // 建立客戶端實例
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // 用於儲存暫存的報名資料，以便最後寫入
+        let pendingRegistrationData = null;
+
+        // ==========================================
+        // 2. 輔助函式：顯示訊息
+        // ==========================================
+        function showFeedback(message, type = 'error') {
+            const feedback = document.getElementById('form-feedback');
+            feedback.innerHTML = message;
+            feedback.style.display = 'block';
+            
+            if (type === 'error') {
+                feedback.className = "text-center text-sm text-rose-600 mt-4 font-bold block bg-rose-50 py-3 rounded-lg border border-rose-200";
+            } else if (type === 'success') {
+                feedback.className = "text-center text-sm text-emerald-600 mt-4 font-bold block bg-emerald-50 py-3 rounded-lg border border-emerald-200";
+            }
+        }
+
+        function hideFeedback() {
+            document.getElementById('form-feedback').style.display = 'none';
+        }
+
+        // ==========================================
+        // 3. 第一階段：本機格式驗證與資料庫狀態檢查
+        // ==========================================
+        async function handlePreSubmit() {
+            const btn = document.getElementById('btn-pre-submit');
+            hideFeedback();
+            
+            // 取得欄位資料
+            const teamName = document.getElementById('team_name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const bloxdId = document.getElementById('bloxd_id').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            // ① 本機格式檢查
+            if (!email || !bloxdId || !description) {
+                return showFeedback("❌ 尚有必填欄位未填寫");
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return showFeedback("❌ Email 格式不正確");
+            }
+            if (bloxdId.length < 3) {
+                return showFeedback("❌ Bloxd ID 長度需大於 3 個字元");
+            }
+
+            // 進入載入狀態
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i>';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            try {
+                let teamId = null;
+                let captainName = '無';
+                let teamMembers = [];
+                let isSolo = true;
+
+                // ② 檢查隊伍是否存在
+                if (teamName !== "") {
+                    isSolo = false;
+                    const { data: teamData, error: teamError } = await supabase
+                        .from('teams')
+                        .select('id, captain')
+                        .eq('team_name', teamName)
+                        .maybeSingle();
+
+                    if (teamError) throw new Error("資料庫查詢失敗，請稍後再試 (Teams)");
+                    if (!teamData) throw new Error("❌ 找不到隊伍");
+
+                    teamId = teamData.id;
+                    captainName = teamData.captain || '未知';
+
+                    const { data: members } = await supabase
+                        .from('players')
+                        .select('bloxd_id')
+                        .eq('team_id', teamId);
+                    
+                    if (members) teamMembers = members.map(m => m.bloxd_id);
+                }
+
+                // ③ 查詢玩家是否已報名 (players 表)
+                const { data: existingPlayer, error: playerError } = await supabase
+                    .from('players')
+                    .select('id')
+                    .eq('bloxd_id', bloxdId)
+                    .maybeSingle();
+                
+                if (playerError) throw new Error("資料庫查詢失敗，請稍後再試 (Players)");
+                if (existingPlayer) throw new Error("❌ 此玩家已完成報名");
+
+                // ④ 查詢 Email 是否已被使用 (registrations 表)
+                const { data: existingEmail, error: emailError } = await supabase
+                    .from('registrations')
+                    .select('id')
+                    .eq('email', email)
+                    .maybeSingle();
+                
+                if (emailError) throw new Error("資料庫查詢失敗，請稍後再試 (Emails)");
+                if (existingEmail) throw new Error("❌ 此 Email 已完成報名");
+
+                // 所有檢查通過，準備 Modal 顯示資料
+                pendingRegistrationData = {
+                    team_id: teamId,
+                    bloxd_id: bloxdId,
+                    email: email,
+                    description: description
+                };
+
+                openModal({
+                    isSolo,
+                    teamName,
+                    captainName,
+                    teamMembers,
+                    bloxdId,
+                    email,
+                    description
+                });
+
+            } catch (error) {
+                showFeedback(error.message);
+            } finally {
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // 4. 第二階段：確認視窗與寫入資料庫
+        // ==========================================
+        function openModal(data) {
+            const detailsBox = document.getElementById('modal-details');
+            
+            if (data.isSolo) {
+                detailsBox.innerHTML = `
+                    <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
+                        <span class="text-polar-500 text-xs tracking-widest block mb-1">身份</span>
+                        <span class="font-bold text-polar-950 text-base">單人選手</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
+                            <span class="text-polar-500 text-xs tracking-widest block mb-1">Bloxd ID</span>
+                            <span class="font-bold text-polar-950">${data.bloxdId}</span>
+                        </div>
+                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100 truncate">
+                            <span class="text-polar-500 text-xs tracking-widest block mb-1">Email</span>
+                            <span class="font-bold text-polar-950" title="${data.email}">${data.email}</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
+                        <span class="text-polar-500 text-xs tracking-widest block mb-1">死亡簡介</span>
+                        <span class="font-bold text-polar-950 block truncate">${data.description}</span>
+                    </div>
+                `;
+            } else {
+                const membersText = data.teamMembers.length > 0 ? data.teamMembers.join(', ') : '尚無隊員報名';
+                detailsBox.innerHTML = `
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
+                            <span class="text-polar-500 text-xs tracking-widest block mb-1">隊伍</span>
+                            <span class="font-bold text-polar-950 text-base">${data.teamName}</span>
+                        </div>
+                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
+                            <span class="text-polar-500 text-xs tracking-widest block mb-1">身份</span>
+                            <span class="font-bold text-polar-950 text-base">正式隊員</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
+                        <span class="text-polar-500 text-xs tracking-widest block mb-1">隊伍資訊</span>
+                        <p class="font-bold text-polar-950 text-sm">隊長：${data.captainName}</p>
+                        <p class="font-bold text-polar-900/70 text-xs mt-1">現有隊員：${membersText}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100 truncate">
+                            <span class="text-polar-500 text-xs tracking-widest block mb-1">Bloxd ID / Email</span>
+                            <span class="font-bold text-polar-950 block">${data.bloxdId}</span>
+                            <span class="text-xs text-polar-600 block truncate mt-0.5">${data.email}</span>
+                        </div>
+                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
+                            <span class="text-polar-500 text-xs tracking-widest block mb-1">死亡簡介</span>
+                            <span class="font-bold text-polar-950 block truncate">${data.description}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('modal-enter');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('modal-enter');
+        }
+
+        async function submitToSupabase() {
+            if (!pendingRegistrationData) return;
+
+            const btn = document.getElementById('btn-final-submit');
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> 寫入中...';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            try {
+                const { error: insertError } = await supabase
+                    .from('registrations')
+                    .insert([{
+                        team_id: pendingRegistrationData.team_id,
+                        bloxd_id: pendingRegistrationData.bloxd_id,
+                        email: pendingRegistrationData.email,
+                        description: pendingRegistrationData.description,
+                        created_at: new Date().toISOString()
+                    }]);
+
+                if (insertError) throw new Error("寫入註冊紀錄失敗");
+
+                const { error: playerInsertError } = await supabase
+                    .from('players')
+                    .insert([{
+                        team_id: pendingRegistrationData.team_id,
+                        bloxd_id: pendingRegistrationData.bloxd_id
+                    }]);
+
+                if (playerInsertError) throw new Error("寫入玩家名單失敗");
+
+                closeModal();
+                showFeedback("✅報名成功！期待您在極地中的表現。（幹掉071!!!!!)", "success");
+                document.getElementById('registration-form').reset();
+                pendingRegistrationData = null;
+
+            } catch (error) {
+                closeModal();
+                showFeedback(` 報名失敗，請在discord或社群將這張截圖上傳，造成不便敬請諒解：${error.message}`);
+            } finally {
+                btn.innerHTML = '確認送出';
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
+
+
