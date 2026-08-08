@@ -1,382 +1,366 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="scroll-smooth">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2027 冬季 UHC 錦標賽 | 立即報名</title>
+    <title>寫實煙火生日祝福</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- 引入 Supabase 官方 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['"Noto Sans TC"', 'sans-serif'], display: ['"Syncopate"', 'sans-serif'] }, colors: { polar: { 50: '#f0f7ff', 100: '#e0effe', 200: '#bae0fd', 300: '#7cc8fc', 400: '#38bdf8', 500: '#0ea5e9', 800: '#0369a1', 900: '#0c4a6e', 950: '#082f49' } } } } }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        :root { --light-glass: rgba(255, 255, 255, 0.75); --light-border: rgba(255, 255, 255, 0.5); --light-shadow: 0 12px 40px -10px rgba(14, 165, 233, 0.15); --blur-effect: blur(16px); }
-        body { background-color: #f0f7ff; color: #0c4a6e; font-family: 'Noto Sans TC', sans-serif; }
-        .bg-overlay { position: fixed; inset: 0; z-index: -2; background: linear-gradient(to bottom, rgba(240, 247, 255, 0.5) 0%, rgba(224, 239, 254, 0.9) 100%); backdrop-filter: blur(8px); }
-        .glass-card { background: var(--light-glass); backdrop-filter: var(--blur-effect); border: 1px solid var(--light-border); box-shadow: var(--light-shadow); border-radius: 24px; }
-        .text-gradient-polar { background: linear-gradient(135deg, #082f49 0%, #0284c7 60%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* 彈窗動畫 */
-        .modal-enter { opacity: 1 !important; pointer-events: auto !important; }
-        .modal-enter .modal-box { transform: scale(1) !important; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: system-ui, -apple-system, sans-serif;
+            user-select: none;
+        }
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        .glow-title {
+            text-shadow: 0 0 30px rgba(255, 105, 180, 0.6), 0 0 60px rgba(147, 51, 234, 0.4);
+        }
     </style>
 </head>
-<body class="antialiased">
-    <div class="bg-overlay"></div>
+<body class="w-screen h-screen overflow-hidden flex flex-col justify-between items-center text-white relative">
 
-    <!-- 導覽列 -->
-    <header id="main-header" class="fixed w-full z-50 top-0 transition-all duration-500 py-3 px-6">
-        <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center glass-card shadow-sm border-white/50">
-            <a href="index.html" class="flex items-center gap-3 text-polar-950 font-bold tracking-widest text-lg">
-                <i data-lucide="snowflake" class="text-polar-500"></i><span class="font-display tracking-wider text-gradient-polar">WINTER UHC</span>
-            </a>
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium tracking-wider text-polar-900">
-                <a href="index.html" class="hover:text-polar-500 transition-colors">首頁</a>
-                <a href="encyclopedia.html" class="hover:text-polar-500 transition-colors">系統百科</a>
-                <a href="database.html" class="hover:text-polar-500 transition-colors">礦物裝備</a>
-                <a href="rules.html" class="hover:text-polar-500 transition-colors">賽事規則</a>
-                <a href="progress.html" class="hover:text-polar-500 transition-colors">開發進度</a>
-                <a href="register.html" class="px-5 py-2.5 bg-polar-900 text-white rounded-xl shadow-lg hover:bg-polar-800 transition-all font-bold">立即報名</a>
-            </nav>
+    <!-- 中央標題與祝賀語 -->
+    <div class="z-10 text-center mt-14 md:mt-20 pointer-events-none px-4">
+        <div class="inline-block mb-3 px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-pink-300 text-xs md:text-sm tracking-widest uppercase animate-pulse shadow-lg">
+            ✨ WISH YOU A WONDERFUL BIRTHDAY ✨
         </div>
-    </header>
-
-    <!-- 報名表單區塊 -->
-    <main class="pt-32 pb-24 px-6 max-w-3xl mx-auto min-h-screen">
-        <div class="glass-card p-8 md:p-12 relative overflow-hidden">
-            <div class="text-center mb-10">
-                <span class="text-polar-600 font-mono text-sm uppercase tracking-widest">Registration</span>
-                <h1 class="text-3xl font-bold text-polar-950 mt-2 mb-2 tracking-wider">參賽選手報名</h1>
-            </div>
-
-            <!-- 表單 -->
-            <form id="registration-form" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <!-- 加入隊伍註冊引導連結 -->
-                        <div class="flex justify-between items-end mb-2">
-                            <label class="block text-polar-900 text-sm font-bold uppercase tracking-widest">隊伍名稱 <span class="text-xs font-normal text-polar-500">(單人請留空)</span></label>
-                            <a href="#" class="text-xs font-bold text-polar-500 hover:text-polar-800 underline underline-offset-2 flex items-center gap-1 transition-colors">
-                                還沒創建隊伍嗎？點此註冊！ <i data-lucide="external-link" class="w-3 h-3"></i>
-                            </a>
-                        </div>
-                        <input type="text" id="team_name" class="w-full p-4 rounded-xl bg-white/70 border border-polar-200 text-polar-950 focus:outline-none focus:border-polar-500 transition-colors text-base shadow-sm" placeholder="記得先創建隊伍，獨行俠請留空（不用害羞，我也是獨行辦比賽）">
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-end mb-2">
-                            <label class="block text-polar-900 text-sm font-bold uppercase tracking-widest">Email 信箱</label>
-                        </div>
-                        <input type="email" id="email" required class="w-full p-4 rounded-xl bg-white/70 border border-polar-200 text-polar-950 focus:outline-none focus:border-polar-500 transition-colors text-base shadow-sm" placeholder="example@mail.com">
-                    </div>
-                </div>
-                
-                <div>
-                    <!-- 加入獲取遊戲 ID 引導連結 -->
-                    <div class="flex justify-between items-end mb-2">
-                        <label class="block text-polar-900 text-sm font-bold uppercase tracking-widest">Bloxd ID</label>
-                        <a href="https://bloxd.io" target="_blank" class="text-xs font-bold text-polar-500 hover:text-polar-800 underline underline-offset-2 flex items-center gap-1 transition-colors">
-                            不知道自己的名字嗎？點此獲得遊戲ID！ <i data-lucide="help-circle" class="w-3 h-3"></i>
-                        </a>
-                    </div>
-                    <input type="text" id="bloxd_id" required class="w-full p-4 rounded-xl bg-white/70 border border-polar-200 text-polar-950 focus:outline-none focus:border-polar-500 transition-colors text-base shadow-sm" placeholder="你的遊戲暱稱 ">
-                </div>
-                
-                <div>
-                    <label class="block text-polar-900 text-sm font-bold uppercase tracking-widest mb-2">死亡簡介 / 參賽宣言</label>
-                    <textarea id="description" rows="3" required class="w-full p-4 rounded-xl bg-white/70 border border-polar-200 text-polar-950 focus:outline-none focus:border-polar-500 transition-colors text-base shadow-sm" placeholder="請簡述你的遺言...當然，如果你贏了這個就會在官網上"></textarea>
-                </div>
-                
-                <button type="button" id="btn-pre-submit" onclick="handlePreSubmit()" class="w-full py-4 bg-polar-900 text-white font-bold rounded-xl shadow-lg hover:bg-polar-800 hover:-translate-y-1 transition-all tracking-widest text-base">
-                    提交報名申請
-                </button>
-                <!-- 錯誤與成功訊息顯示區 -->
-                <p id="form-feedback" class="text-center text-sm mt-4 hidden font-medium"></p>
-            </form>
-        </div>
-    </main>
-
-    <footer class="border-t border-polar-200 bg-white/40 py-12 px-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6"><div class="flex items-center gap-3 font-bold tracking-widest"><i data-lucide="snowflake" class="text-polar-500"></i><span class="font-display">WINTER UHC 2027</span></div><p class="text-sm text-polar-600">&copy; 2027 Winter UHC Championship. 非官方社群賽事。</p></div>
-    </footer>
-
-    <!-- 確認視窗 (Modal) -->
-    <div id="confirm-modal" class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-        <!-- 模糊遮罩 -->
-        <div class="absolute inset-0 bg-polar-950/40 backdrop-blur-sm" onclick="closeModal()"></div>
-        <!-- Modal 內容 -->
-        <div class="modal-box glass-card p-8 w-full max-w-md mx-6 relative z-10 transform scale-95 transition-transform duration-300">
-            <h2 class="text-2xl font-bold text-polar-950 mb-4 border-b border-polar-200 pb-3 flex items-center gap-2">
-                <i data-lucide="check-circle" class="text-polar-500 w-6 h-6"></i> 請確認資料
-            </h2>
-            <div id="modal-details" class="space-y-3 text-polar-900 text-sm mb-8 leading-relaxed font-medium">
-                <!-- 動態生成的確認內容會放在這 -->
-            </div>
-            <div class="flex gap-4">
-                <button onclick="closeModal()" class="flex-1 py-3 bg-white/60 border border-polar-200 text-polar-800 rounded-xl hover:bg-white transition-all font-bold tracking-widest">返回修改</button>
-                <button onclick="submitToSupabase()" id="btn-final-submit" class="flex-1 py-3 bg-polar-900 text-white rounded-xl shadow-lg hover:bg-polar-800 transition-all font-bold tracking-widest flex items-center justify-center gap-2">
-                    確認送出
-                </button>
-            </div>
-        </div>
+        <h1 class="text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-300 to-amber-200 glow-title tracking-widest mb-4">
+            生日快樂
+        </h1>
+        <p class="text-gray-300 text-base md:text-xl font-light tracking-wide drop-shadow-md">
+            點擊畫面任意處施放璀璨煙火 ｜ 音樂可隨時開啟/關閉
+        </p>
     </div>
 
-    <!-- JavaScript 邏輯區 -->
+    <!-- 底部控制按鈕列 -->
+    <div class="z-10 mb-10 flex gap-4 pointer-events-auto">
+        <button id="musicBtn" onclick="toggleMusic()" class="px-7 py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 font-semibold rounded-full shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer text-sm md:text-base flex items-center gap-2">
+            🔇 播放生日旋律
+        </button>
+        <button onclick="launchGrandFinale()" class="px-7 py-3.5 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-90 font-semibold rounded-full shadow-lg shadow-pink-500/40 transform hover:scale-105 active:scale-95 transition-all duration-300 border border-pink-400/30 cursor-pointer text-sm md:text-base">
+            🎆 施放盛大煙火秀
+        </button>
+    </div>
+
+    <!-- 渲染容器 -->
+    <div id="canvas-container"></div>
+
     <script>
-        lucide.createIcons();
-
-        // ==========================================
-        // 1. Supabase 初始化設定
-        // ==========================================
-        const SUPABASE_URL = 'https://your-project-id.supabase.co'; // [請替換] 你的 Supabase URL
-        const SUPABASE_ANON_KEY = 'your-anon-key'; // [請替換] 你的 Supabase Anon Key
+        let scene, camera, renderer;
+        let fireworks = [];
+        let stars;
+        let ambientLight, pointLight;
         
-        // 建立客戶端實例
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Web Audio API 相關變數 (用於播放生日快樂歌音樂合成)
+        let audioCtx = null;
+        let isPlayingMusic = false;
+        let musicTimer = null;
 
-        // 用於儲存暫存的報名資料，以便最後寫入
-        let pendingRegistrationData = null;
+        function init() {
+            const container = document.getElementById('canvas-container');
 
-        // ==========================================
-        // 2. 輔助函式：顯示訊息
-        // ==========================================
-        function showFeedback(message, type = 'error') {
-            const feedback = document.getElementById('form-feedback');
-            feedback.innerHTML = message;
-            feedback.style.display = 'block';
-            
-            if (type === 'error') {
-                feedback.className = "text-center text-sm text-rose-600 mt-4 font-bold block bg-rose-50 py-3 rounded-lg border border-rose-200";
-            } else if (type === 'success') {
-                feedback.className = "text-center text-sm text-emerald-600 mt-4 font-bold block bg-emerald-50 py-3 rounded-lg border border-emerald-200";
-            }
+            // 1. 場景設置
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x010105, 0.012);
+
+            // 2. 相機設置
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 22);
+
+            // 3. 渲染器設置 (啟用 ToneMapping 與陰影以呈現寫實感)
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            container.appendChild(renderer.domElement);
+
+            // 4. 動態光影 (模擬煙火爆炸時的光照閃爍)
+            ambientLight = new THREE.AmbientLight(0x050510, 1.5);
+            scene.add(ambientLight);
+
+            pointLight = new THREE.PointLight(0xff5588, 0, 40);
+            pointLight.position.set(0, 5, 5);
+            scene.add(pointLight);
+
+            // 5.  배경星空
+            createStarfield();
+
+            // 6. 事件監聽
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                const coords = getNormalizedCoords(e.clientX, e.clientY);
+                launchRocket(coords.x * 12, -8, (Math.random() - 0.5) * 5, coords.x * 3, Math.random() * 8 + 6);
+            });
+
+            animate();
         }
 
-        function hideFeedback() {
-            document.getElementById('form-feedback').style.display = 'none';
+        function getNormalizedCoords(clientX, clientY) {
+            return {
+                x: (clientX / window.innerWidth) * 2 - 1,
+                y: -(clientY / window.innerHeight) * 2 + 1
+            };
         }
 
-        // ==========================================
-        // 3. 第一階段：本機格式驗證與資料庫狀態檢查
-        // ==========================================
-        async function handlePreSubmit() {
-            const btn = document.getElementById('btn-pre-submit');
-            hideFeedback();
-            
-            // 取得欄位資料
-            const teamName = document.getElementById('team_name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const bloxdId = document.getElementById('bloxd_id').value.trim();
-            const description = document.getElementById('description').value.trim();
-
-            // ① 本機格式檢查
-            if (!email || !bloxdId || !description) {
-                return showFeedback("❌ 尚有必填欄位未填寫");
+        function createStarfield() {
+            const geometry = new THREE.BufferGeometry();
+            const count = 1200;
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 80;
+                positions[i + 1] = Math.random() * 40 - 5;
+                positions[i + 2] = (Math.random() - 0.5) * 80;
             }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                return showFeedback("❌ Email 格式不正確");
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({
+                color: 0x8899bb,
+                size: 0.1,
+                transparent: true,
+                opacity: 0.6
+            });
+            stars = new THREE.Points(geometry, material);
+            scene.add(stars);
+        }
+
+        // 寫實煙火類別 (包含升空、爆炸、重力加速度、拖尾與光芒衰減)
+        class RealisticFirework {
+            constructor(startX, startY, startZ, targetX, targetY, targetZ) {
+                this.isExploded = false;
+                this.position = new THREE.Vector3(startX, startY, startZ);
+                this.target = new THREE.Vector3(targetX, targetY, targetZ);
+                
+                // 升空軌跡速度
+                const dir = new THREE.Vector3().subVectors(this.target, this.position);
+                const distance = dir.length();
+                dir.normalize();
+                this.velocity = dir.multiplyScalar(distance * 0.045);
+
+                // 建立升空彈頭點陣
+                const rocketGeo = new THREE.BufferGeometry();
+                rocketGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([startX, startY, startZ]), 3));
+                this.rocketMat = new THREE.PointsMaterial({
+                    color: 0xffeedd,
+                    size: 0.25,
+                    transparent: true,
+                    opacity: 1
+                });
+                this.rocketMesh = new THREE.Points(rocketGeo, this.rocketMat);
+                scene.add(this.rocketMesh);
+
+                this.particles = null;
+                this.particleGeo = null;
+                this.particleMat = null;
+                this.alpha = 1;
+                this.color = new THREE.Color();
             }
-            if (bloxdId.length < 3) {
-                return showFeedback("❌ Bloxd ID 長度需大於 3 個字元");
-            }
 
-            // 進入載入狀態
-            const originalBtnText = btn.innerHTML;
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i>';
-            btn.disabled = true;
-            lucide.createIcons();
+            update() {
+                if (!this.isExploded) {
+                    this.position.add(this.velocity);
+                    const posAttr = this.rocketMesh.geometry.attributes.position;
+                    posAttr.setXYZ(0, this.position.x, this.position.y, this.position.z);
+                    posAttr.needsUpdate = true;
 
-            try {
-                let teamId = null;
-                let captainName = '無';
-                let teamMembers = [];
-                let isSolo = true;
-
-                // ② 檢查隊伍是否存在
-                if (teamName !== "") {
-                    isSolo = false;
-                    const { data: teamData, error: teamError } = await supabase
-                        .from('teams')
-                        .select('id, captain')
-                        .eq('team_name', teamName)
-                        .maybeSingle();
-
-                    if (teamError) throw new Error("資料庫查詢失敗，請稍後再試 (Teams)");
-                    if (!teamData) throw new Error("❌ 找不到隊伍");
-
-                    teamId = teamData.id;
-                    captainName = teamData.captain || '未知';
-
-                    const { data: members } = await supabase
-                        .from('players')
-                        .select('bloxd_id')
-                        .eq('team_id', teamId);
+                    // 到達目標高度或速度耗盡時爆炸
+                    if (this.position.y >= this.target.y || this.velocity.y <= 0) {
+                        scene.remove(this.rocketMesh);
+                        this.explode();
+                    }
+                } else {
+                    // 爆炸後粒子物理模擬
+                    const positions = this.particleGeo.attributes.position.array;
+                    const velocities = this.particleVelocities;
                     
-                    if (members) teamMembers = members.map(m => m.bloxd_id);
+                    this.alpha -= 0.012;
+                    this.particleMat.opacity = Math.max(this.alpha, 0);
+
+                    for (let i = 0; i < positions.length / 3; i++) {
+                        velocities[i * 3 + 1] -= 0.0035; // 重力
+                        velocities[i * 3] *= 0.97;      // 空氣阻力
+                        velocities[i * 3 + 1] *= 0.97;
+                        velocities[i * 3 + 2] *= 0.97;
+
+                        positions[i * 3] += velocities[i * 3];
+                        positions[i * 3 + 1] += velocities[i * 3 + 1];
+                        positions[i * 3 + 2] += velocities[i * 3 + 2];
+                    }
+                    this.particleGeo.attributes.position.needsUpdate = true;
+                }
+            }
+
+            explode() {
+                this.isExploded = true;
+                const count = 350;
+                this.particleGeo = new THREE.BufferGeometry();
+                const positions = new Float32Array(count * 3);
+                this.particleVelocities = new Float32Array(count * 3);
+
+                // 隨機豐富色系
+                const colorsList = [0xff3366, 0xff9933, 0xffff66, 0x33ccff, 0xcc66ff, 0xffffff];
+                this.color.set(colorsList[Math.floor(Math.random() * colorsList.length)]);
+
+                // 點亮環境光影瞬間
+                pointLight.position.copy(this.position);
+                pointLight.color = this.color;
+                pointLight.intensity = 5;
+
+                for (let i = 0; i < count; i++) {
+                    positions[i * 3] = this.position.x;
+                    positions[i * 3 + 1] = this.position.y;
+                    positions[i * 3 + 2] = this.position.z;
+
+                    // 球形擴散速度
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos((Math.random() * 2) - 1);
+                    const speed = Math.random() * 0.28 + 0.05;
+
+                    this.particleVelocities[i * 3] = speed * Math.sin(phi) * Math.cos(theta);
+                    this.particleVelocities[i * 3 + 1] = speed * Math.sin(phi) * Math.sin(theta);
+                    this.particleVelocities[i * 3 + 2] = speed * Math.cos(phi);
                 }
 
-                // ③ 查詢玩家是否已報名 (players 表)
-                const { data: existingPlayer, error: playerError } = await supabase
-                    .from('players')
-                    .select('id')
-                    .eq('bloxd_id', bloxdId)
-                    .maybeSingle();
+                this.particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
                 
-                if (playerError) throw new Error("資料庫查詢失敗，請稍後再試 (Players)");
-                if (existingPlayer) throw new Error("❌ 此玩家已完成報名");
-
-                // ④ 查詢 Email 是否已被使用 (registrations 表)
-                const { data: existingEmail, error: emailError } = await supabase
-                    .from('registrations')
-                    .select('id')
-                    .eq('email', email)
-                    .maybeSingle();
-                
-                if (emailError) throw new Error("資料庫查詢失敗，請稍後再試 (Emails)");
-                if (existingEmail) throw new Error("❌ 此 Email 已完成報名");
-
-                // 所有檢查通過，準備 Modal 顯示資料
-                pendingRegistrationData = {
-                    team_id: teamId,
-                    bloxd_id: bloxdId,
-                    email: email,
-                    description: description
-                };
-
-                openModal({
-                    isSolo,
-                    teamName,
-                    captainName,
-                    teamMembers,
-                    bloxdId,
-                    email,
-                    description
+                // 採用 additive blending 讓重疊處發光，呈現真實煙火亮麗感
+                this.particleMat = new THREE.PointsMaterial({
+                    color: this.color,
+                    size: 0.18,
+                    transparent: true,
+                    opacity: 1,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
                 });
 
-            } catch (error) {
-                showFeedback(error.message);
-            } finally {
-                btn.innerHTML = originalBtnText;
-                btn.disabled = false;
+                this.particles = new THREE.Points(this.particleGeo, this.particleMat);
+                scene.add(this.particles);
+            }
+
+            destroy() {
+                if (this.isExploded) {
+                    scene.remove(this.particles);
+                    this.particleGeo.dispose();
+                    this.particleMat.dispose();
+                } else {
+                    scene.remove(this.rocketMesh);
+                }
             }
         }
 
-        // ==========================================
-        // 4. 第二階段：確認視窗與寫入資料庫
-        // ==========================================
-        function openModal(data) {
-            const detailsBox = document.getElementById('modal-details');
-            
-            if (data.isSolo) {
-                detailsBox.innerHTML = `
-                    <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
-                        <span class="text-polar-500 text-xs tracking-widest block mb-1">身份</span>
-                        <span class="font-bold text-polar-950 text-base">單人選手</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
-                            <span class="text-polar-500 text-xs tracking-widest block mb-1">Bloxd ID</span>
-                            <span class="font-bold text-polar-950">${data.bloxdId}</span>
-                        </div>
-                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100 truncate">
-                            <span class="text-polar-500 text-xs tracking-widest block mb-1">Email</span>
-                            <span class="font-bold text-polar-950" title="${data.email}">${data.email}</span>
-                        </div>
-                    </div>
-                    <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
-                        <span class="text-polar-500 text-xs tracking-widest block mb-1">死亡簡介</span>
-                        <span class="font-bold text-polar-950 block truncate">${data.description}</span>
-                    </div>
-                `;
+        function launchRocket(startX, startY, startZ, targetX, targetY) {
+            fireworks.push(new RealisticFirework(startX, startY, startZ, targetX, targetY, (Math.random() - 0.5) * 3));
+        }
+
+        window.launchGrandFinale = function() {
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const x = (Math.random() - 0.5) * 16;
+                    launchRocket((Math.random() - 0.5) * 8, -8, 0, x, Math.random() * 6 + 4);
+                }, i * 200);
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // 網頁背景音樂合成 (Web Audio API 播放柔和生日旋律)
+        function toggleMusic() {
+            const btn = document.getElementById('musicBtn');
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (isPlayingMusic) {
+                if (musicTimer) clearInterval(musicTimer);
+                isPlayingMusic = false;
+                btn.innerHTML = "🔇 播放生日旋律";
             } else {
-                const membersText = data.teamMembers.length > 0 ? data.teamMembers.join(', ') : '尚無隊員報名';
-                detailsBox.innerHTML = `
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
-                            <span class="text-polar-500 text-xs tracking-widest block mb-1">隊伍</span>
-                            <span class="font-bold text-polar-950 text-base">${data.teamName}</span>
-                        </div>
-                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
-                            <span class="text-polar-500 text-xs tracking-widest block mb-1">身份</span>
-                            <span class="font-bold text-polar-950 text-base">正式隊員</span>
-                        </div>
-                    </div>
-                    <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
-                        <span class="text-polar-500 text-xs tracking-widest block mb-1">隊伍資訊</span>
-                        <p class="font-bold text-polar-950 text-sm">隊長：${data.captainName}</p>
-                        <p class="font-bold text-polar-900/70 text-xs mt-1">現有隊員：${membersText}</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100 truncate">
-                            <span class="text-polar-500 text-xs tracking-widest block mb-1">Bloxd ID / Email</span>
-                            <span class="font-bold text-polar-950 block">${data.bloxdId}</span>
-                            <span class="text-xs text-polar-600 block truncate mt-0.5">${data.email}</span>
-                        </div>
-                        <div class="p-3 bg-white/50 rounded-lg border border-polar-100">
-                            <span class="text-polar-500 text-xs tracking-widest block mb-1">死亡簡介</span>
-                            <span class="font-bold text-polar-950 block truncate">${data.description}</span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            const modal = document.getElementById('confirm-modal');
-            modal.classList.add('modal-enter');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('confirm-modal');
-            modal.classList.remove('modal-enter');
-        }
-
-        async function submitToSupabase() {
-            if (!pendingRegistrationData) return;
-
-            const btn = document.getElementById('btn-final-submit');
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> 寫入中...';
-            btn.disabled = true;
-            lucide.createIcons();
-
-            try {
-                const { error: insertError } = await supabase
-                    .from('registrations')
-                    .insert([{
-                        team_id: pendingRegistrationData.team_id,
-                        bloxd_id: pendingRegistrationData.bloxd_id,
-                        email: pendingRegistrationData.email,
-                        description: pendingRegistrationData.description,
-                        created_at: new Date().toISOString()
-                    }]);
-
-                if (insertError) throw new Error("寫入註冊紀錄失敗");
-
-                const { error: playerInsertError } = await supabase
-                    .from('players')
-                    .insert([{
-                        team_id: pendingRegistrationData.team_id,
-                        bloxd_id: pendingRegistrationData.bloxd_id
-                    }]);
-
-                if (playerInsertError) throw new Error("寫入玩家名單失敗");
-
-                closeModal();
-                showFeedback("✅報名成功！期待您在極地中的表現。（幹掉071!!!!!)", "success");
-                document.getElementById('registration-form').reset();
-                pendingRegistrationData = null;
-
-            } catch (error) {
-                closeModal();
-                showFeedback(` 報名失敗，請在discord或社群將這張截圖上傳，造成不便敬請諒解：${error.message}`);
-            } finally {
-                btn.innerHTML = '確認送出';
-                btn.disabled = false;
+                audioCtx.resume();
+                playHappyBirthdaySong();
+                isPlayingMusic = true;
+                btn.innerHTML = "🔊 關閉生日旋律";
             }
         }
+
+        function playHappyBirthdaySong() {
+            // 生日快樂歌音符頻率對應
+            const notes = [
+                { f: 261.63, d: 400 }, { f: 261.63, d: 200 }, { f: 293.66, d: 600 }, { f: 261.63, d: 600 }, { f: 349.23, d: 600 }, { f: 329.63, d: 1200 },
+                { f: 261.63, d: 400 }, { f: 261.63, d: 200 }, { f: 293.66, d: 600 }, { f: 261.63, d: 600 }, { f: 392.00, d: 600 }, { f: 349.23, d: 1200 },
+                { f: 261.63, d: 400 }, { f: 261.63, d: 200 }, { f: 523.25, d: 600 }, { f: 440.00, d: 600 }, { f: 349.23, d: 600 }, { f: 329.63, d: 600 }, { f: 293.66, d: 1200 },
+                { f: 466.16, d: 400 }, { f: 466.16, d: 200 }, { f: 440.00, d: 600 }, { f: 349.23, d: 600 }, { f: 392.00, d: 600 }, { f: 349.23, d: 1400 }
+            ];
+
+            let index = 0;
+            function playNext() {
+                if (!isPlayingMusic) return;
+                const note = notes[index];
+                
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.value = note.f;
+                
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (note.d / 1000) * 0.9);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + note.d / 1000);
+
+                index = (index + 1) % notes.length;
+                musicTimer = setTimeout(playNext, note.d * 1.1);
+            }
+            playNext();
+        }
+
+        // 動畫迴圈
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 環境光影衰減
+            if (pointLight.intensity > 0) {
+                pointLight.intensity *= 0.92;
+            }
+
+            // 更新煙火
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                let fw = fireworks[i];
+                fw.update();
+                if (fw.isExploded && fw.alpha <= 0) {
+                    fw.destroy();
+                    fireworks.splice(i, 1);
+                }
+            }
+
+            // 隨機自動施放煙火
+            if (Math.random() < 0.035 && fireworks.length < 5) {
+                const rx = (Math.random() - 0.5) * 16;
+                const ry = Math.random() * 5 + 3;
+                launchRocket((Math.random() - 0.5) * 10, -8, 0, rx, ry);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
-
 
