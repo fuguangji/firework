@@ -310,15 +310,10 @@ function toggleMusic() {
 
     if (bgm.paused) {
         bgm.play().then(() => {
-            btn.textContent = "🔊 關閉音樂";
+            btn.textContent = "好好享受～";
             fadeInMusic();
         });
-    } else {
-        fadeOutMusic(() => {
-            bgm.pause();
-            btn.textContent = "🎵 播放音樂";
-        });
-    }
+    } 
 }
 
 function fadeInMusic() {
