@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>寫實煙火生日祝福</title>
+    <title>齁齁 ( pig is cute 生日快樂🎁🎈🎊🎂！！！</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
@@ -31,23 +31,20 @@
     <!-- 中央標題與祝賀語 -->
     <div class="z-10 text-center mt-14 md:mt-20 pointer-events-none px-4">
         <div class="inline-block mb-3 px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-pink-300 text-xs md:text-sm tracking-widest uppercase animate-pulse shadow-lg">
-            ✨ WISH YOU A WONDERFUL BIRTHDAY ✨
+            ✨ 希望你有美好的一天！以及...會考順利～ ✨
         </div>
         <h1 class="text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-300 to-amber-200 glow-title tracking-widest mb-4">
-            生日快樂
+            齁齁 ( pig is cute 生日快樂～～～！
         </h1>
         <p class="text-gray-300 text-base md:text-xl font-light tracking-wide drop-shadow-md">
-            點擊畫面任意處施放璀璨煙火 ｜ 音樂可隨時開啟/關閉
+            點擊畫面任意處施放璀璨煙火
         </p>
     </div>
 
     <!-- 底部控制按鈕列 -->
     <div class="z-10 mb-10 flex gap-4 pointer-events-auto">
-        <button id="musicBtn" onclick="toggleMusic()" class="px-7 py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 font-semibold rounded-full shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer text-sm md:text-base flex items-center gap-2">
-            🔇 播放生日旋律
-        </button>
         <button onclick="launchGrandFinale()" class="px-7 py-3.5 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-90 font-semibold rounded-full shadow-lg shadow-pink-500/40 transform hover:scale-105 active:scale-95 transition-all duration-300 border border-pink-400/30 cursor-pointer text-sm md:text-base">
-            🎆 施放盛大煙火秀
+            施放煙火🎆！
         </button>
     </div>
 
@@ -92,7 +89,7 @@
             pointLight.position.set(0, 5, 5);
             scene.add(pointLight);
 
-            // 5.  배경星空
+            // 5.  星空
             createStarfield();
 
             // 6. 事件監聽
@@ -276,59 +273,6 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // 網頁背景音樂合成 (Web Audio API 播放柔和生日旋律)
-        function toggleMusic() {
-            const btn = document.getElementById('musicBtn');
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-
-            if (isPlayingMusic) {
-                if (musicTimer) clearInterval(musicTimer);
-                isPlayingMusic = false;
-                btn.innerHTML = "🔇 播放生日旋律";
-            } else {
-                audioCtx.resume();
-                playHappyBirthdaySong();
-                isPlayingMusic = true;
-                btn.innerHTML = "🔊 關閉生日旋律";
-            }
-        }
-
-        function playHappyBirthdaySong() {
-            // 生日快樂歌音符頻率對應
-            const notes = [
-                { f: 261.63, d: 400 }, { f: 261.63, d: 200 }, { f: 293.66, d: 600 }, { f: 261.63, d: 600 }, { f: 349.23, d: 600 }, { f: 329.63, d: 1200 },
-                { f: 261.63, d: 400 }, { f: 261.63, d: 200 }, { f: 293.66, d: 600 }, { f: 261.63, d: 600 }, { f: 392.00, d: 600 }, { f: 349.23, d: 1200 },
-                { f: 261.63, d: 400 }, { f: 261.63, d: 200 }, { f: 523.25, d: 600 }, { f: 440.00, d: 600 }, { f: 349.23, d: 600 }, { f: 329.63, d: 600 }, { f: 293.66, d: 1200 },
-                { f: 466.16, d: 400 }, { f: 466.16, d: 200 }, { f: 440.00, d: 600 }, { f: 349.23, d: 600 }, { f: 392.00, d: 600 }, { f: 349.23, d: 1400 }
-            ];
-
-            let index = 0;
-            function playNext() {
-                if (!isPlayingMusic) return;
-                const note = notes[index];
-                
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.value = note.f;
-                
-                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (note.d / 1000) * 0.9);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + note.d / 1000);
-
-                index = (index + 1) % notes.length;
-                musicTimer = setTimeout(playNext, note.d * 1.1);
-            }
-            playNext();
-        }
 
         // 動畫迴圈
         function animate() {
